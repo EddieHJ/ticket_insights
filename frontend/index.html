@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>工单对比分析</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 1000px;
+            width: 100%;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 40px;
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .event-type-section {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.2em;
+            color: #555;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .event-type-selector {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 40px;
+        }
+
+        .event-type-option {
+            position: relative;
+        }
+
+        .event-type-option input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .event-type-option label {
+            display: block;
+            padding: 12px 30px;
+            border: 2px solid #ddd;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: #666;
+            background: white;
+        }
+
+        .event-type-option input[type="radio"]:checked + label {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .comparison-section {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .time-period {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .time-period:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .period-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .vs-divider {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            text-align: center;
+            position: relative;
+        }
+
+        .vs-divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            opacity: 0.1;
+            z-index: -1;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .submit-section {
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .submit-button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 50px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        .submit-button:active {
+            transform: translateY(0);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+            color: #667eea;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .result-section {
+            margin-top: 40px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            display: none;
+        }
+
+        .result-section.active {
+            display: block;
+        }
+
+        .result-content {
+            white-space: pre-wrap;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>工单对比分析系统</h1>
+
+        <div class="event-type-section">
+            <div class="section-title">选择 Event Type</div>
+            <div class="event-type-selector">
+                <div class="event-type-option">
+                    <input type="radio" id="slm" name="eventType" value="SLM" checked>
+                    <label for="slm">SLM</label>
+                </div>
+                <div class="event-type-option">
+                    <input type="radio" id="wos" name="eventType" value="WOS">
+                    <label for="wos">WOS</label>
+                </div>
+                <div class="event-type-option">
+                    <input type="radio" id="pos" name="eventType" value="POS">
+                    <label for="pos">POS</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="comparison-section">
+            <div class="time-period">
+                <h2 class="period-title">时间段 1</h2>
+                <div class="form-group">
+                    <label for="start1">开始时间</label>
+                    <input type="datetime-local" id="start1" required>
+                </div>
+                <div class="form-group">
+                    <label for="end1">结束时间</label>
+                    <input type="datetime-local" id="end1" required>
+                </div>
+            </div>
+
+            <div class="vs-divider">VS</div>
+
+            <div class="time-period">
+                <h2 class="period-title">时间段 2</h2>
+                <div class="form-group">
+                    <label for="start2">开始时间</label>
+                    <input type="datetime-local" id="start2" required>
+                </div>
+                <div class="form-group">
+                    <label for="end2">结束时间</label>
+                    <input type="datetime-local" id="end2" required>
+                </div>
+            </div>
+        </div>
+
+        <div class="submit-section">
+            <button class="submit-button" onclick="submitComparison()">开始对比分析</button>
+        </div>
+
+        <div class="loading">
+            <span>正在分析中，请稍候</span>
+            <div class="spinner"></div>
+        </div>
+
+        <div class="error-message"></div>
+
+        <div class="result-section">
+            <h3 style="margin-bottom: 20px; color: #333;">分析结果</h3>
+            <div class="result-content"></div>
+        </div>
+    </div>
+
+    <script>
+        // 设置默认时间（当前时间和一周前）
+        function setDefaultDates() {
+            const now = new Date();
+            const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+
+            // 格式化为datetime-local所需的格式
+            const formatDate = (date) => {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                return `${year}-${month}-${day}T${hours}:${minutes}`;
+            };
+
+            document.getElementById('start1').value = formatDate(oneWeekAgo);
+            document.getElementById('end1').value = formatDate(now);
+            document.getElementById('start2').value = formatDate(twoWeeksAgo);
+            document.getElementById('end2').value = formatDate(oneWeekAgo);
+        }
+
+        // 页面加载时设置默认日期
+        window.onload = setDefaultDates;
+
+        async function submitComparison() {
+            // 获取表单数据
+            const eventType = document.querySelector('input[name="eventType"]:checked').value;
+            const start1 = document.getElementById('start1').value;
+            const end1 = document.getElementById('end1').value;
+            const start2 = document.getElementById('start2').value;
+            const end2 = document.getElementById('end2').value;
+
+            // 验证输入
+            if (!start1 || !end1 || !start2 || !end2) {
+                showError('请填写所有时间字段');
+                return;
+            }
+
+            // 显示加载状态
+            showLoading(true);
+            hideError();
+            hideResult();
+
+            // 构建请求URL
+            const params = new URLSearchParams({
+                start_date_1: new Date(start1).toISOString(),
+                end_date_1: new Date(end1).toISOString(),
+                event_type_3_first: eventType,
+                start_date_2: new Date(start2).toISOString(),
+                end_date_2: new Date(end2).toISOString(),
+                event_type_3_second: eventType
+            });
+
+            const url = `http://localhost:8000/tickets/get_tickets_of_two_periods_and_by_type?${params}`;
+
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                showResult(data);
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError('请求失败：' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function showLoading(show) {
+            const loading = document.querySelector('.loading');
+            if (show) {
+                loading.classList.add('active');
+            } else {
+                loading.classList.remove('active');
+            }
+        }
+
+        function showError(message) {
+            const errorElement = document.querySelector('.error-message');
+            errorElement.textContent = message;
+            errorElement.classList.add('active');
+        }
+
+        function hideError() {
+            const errorElement = document.querySelector('.error-message');
+            errorElement.classList.remove('active');
+        }
+
+        function showResult(data) {
+            const resultSection = document.querySelector('.result-section');
+            const resultContent = document.querySelector('.result-content');
+
+            // 如果返回的是字符串，直接显示
+            if (typeof data === 'string') {
+                resultContent.textContent = data;
+            } else {
+                // 如果是JSON对象，格式化显示
+                resultContent.textContent = JSON.stringify(data, null, 2);
+            }
+
+            resultSection.classList.add('active');
+        }
+
+        function hideResult() {
+            const resultSection = document.querySelector('.result-section');
+            resultSection.classList.remove('active');
+        }
+    </script>
+</body>
+</html>
