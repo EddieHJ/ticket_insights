@@ -1,4 +1,14 @@
-**/*.xlsx
-**/*.xls
-**/*.ipynb
-**/*.pyc
+#**/*.xlsx
+#**/*.xls
+#**/*.ipynb
+#**/*.pyc
+
+
+# 忽略编译缓存
+*.pyc
+__pycache__/
+
+# 忽略临时文件
+*.xlsx
+*.xls
+*.ipynb
