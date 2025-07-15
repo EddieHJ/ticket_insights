@@ -1,7 +1,12 @@
 import json
+import os
 from openai import OpenAI
 
-client = OpenAI()
+client = OpenAI(
+    api_key=os.getenv("DASHSCOPE_API_KEY"),
+    base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+)
+
 
 def analyze_ticket_periods(tickets1: list[dict], tickets2: list[dict]) -> str:
     """
@@ -32,7 +37,7 @@ def analyze_ticket_periods(tickets1: list[dict], tickets2: list[dict]) -> str:
     """.strip()
 
     completion = client.chat.completions.create(
-        model="gpt-4o-mini-2024-07-18",
+        model="qwen-turbo-2025-04-28",
         messages=[{"role": "user", "content": prompt}],
         timeout=120
     )
