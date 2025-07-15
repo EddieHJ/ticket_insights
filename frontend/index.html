@@ -26,7 +26,7 @@
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
             padding: 40px;
-            max-width: 1000px;
+            max-width: 1200px;
             width: 100%;
             backdrop-filter: blur(10px);
         }
@@ -50,6 +50,7 @@
             color: #555;
             margin-bottom: 10px;
             font-weight: 600;
+            text-align: center;
         }
 
         .event-type-selector {
@@ -163,6 +164,27 @@
             border-color: #667eea;
         }
 
+        .date-range-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .date-range-input:hover {
+            border-color: #667eea;
+        }
+
+        .date-range-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
         .submit-section {
             margin-top: 40px;
             text-align: center;
@@ -190,6 +212,12 @@
             transform: translateY(0);
         }
 
+        .submit-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
         .loading {
             display: none;
             text-align: center;
@@ -207,22 +235,63 @@
             background: #f8f9fa;
             border-radius: 15px;
             display: none;
+            max-height: 600px;
+            overflow-y: auto;
         }
 
         .result-section.active {
             display: block;
         }
 
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .result-header h3 {
+            color: #333;
+            margin: 0;
+        }
+
+        .copy-button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.3s ease;
+        }
+
+        .copy-button:hover {
+            background: #5a67d8;
+        }
+
+        .copy-button.copied {
+            background: #48bb78;
+        }
+
         .result-content {
             white-space: pre-wrap;
             color: #333;
-            line-height: 1.6;
+            line-height: 1.8;
+            font-size: 0.95em;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
         }
 
         .error-message {
             color: #e74c3c;
             text-align: center;
             margin-top: 20px;
+            padding: 15px;
+            background: #fee;
+            border-radius: 8px;
             display: none;
         }
 
@@ -244,6 +313,62 @@
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin-left: 10px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .comparison-section {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .vs-divider {
+                transform: rotate(90deg);
+                margin: 20px 0;
+            }
+
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+        }
+
+        /* 滚动条美化 */
+        .result-section::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .result-section::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        .result-section::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .result-section::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-section.active {
+            animation: fadeIn 0.5s ease;
         }
     </style>
 </head>
@@ -273,12 +398,11 @@
             <div class="time-period">
                 <h2 class="period-title">时间段 1</h2>
                 <div class="form-group">
-                    <label for="start1">开始时间</label>
-                    <input type="datetime-local" id="start1" required>
-                </div>
-                <div class="form-group">
-                    <label for="end1">结束时间</label>
-                    <input type="datetime-local" id="end1" required>
+                    <label for="dateRange1">选择日期范围</label>
+                    <input type="text" id="dateRange1" class="date-range-input" readonly
+                           placeholder="点击选择日期范围">
+                    <input type="hidden" id="start1">
+                    <input type="hidden" id="end1">
                 </div>
             </div>
 
@@ -287,12 +411,11 @@
             <div class="time-period">
                 <h2 class="period-title">时间段 2</h2>
                 <div class="form-group">
-                    <label for="start2">开始时间</label>
-                    <input type="datetime-local" id="start2" required>
-                </div>
-                <div class="form-group">
-                    <label for="end2">结束时间</label>
-                    <input type="datetime-local" id="end2" required>
+                    <label for="dateRange2">选择日期范围</label>
+                    <input type="text" id="dateRange2" class="date-range-input" readonly
+                           placeholder="点击选择日期范围">
+                    <input type="hidden" id="start2">
+                    <input type="hidden" id="end2">
                 </div>
             </div>
         </div>
@@ -309,10 +432,17 @@
         <div class="error-message"></div>
 
         <div class="result-section">
-            <h3 style="margin-bottom: 20px; color: #333;">分析结果</h3>
+            <div class="result-header">
+                <h3>分析结果</h3>
+                <button class="copy-button" onclick="copyResult()">复制结果</button>
+            </div>
             <div class="result-content"></div>
         </div>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flatpickr/4.6.13/themes/material_purple.css">
 
     <script>
         // 设置默认时间（当前时间和一周前）
@@ -321,20 +451,66 @@
             const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
             const twoWeeksAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
 
-            // 格式化为datetime-local所需的格式
+            // 格式化日期
             const formatDate = (date) => {
                 const year = date.getFullYear();
                 const month = String(date.getMonth() + 1).padStart(2, '0');
                 const day = String(date.getDate()).padStart(2, '0');
-                const hours = String(date.getHours()).padStart(2, '0');
-                const minutes = String(date.getMinutes()).padStart(2, '0');
-                return `${year}-${month}-${day}T${hours}:${minutes}`;
+                return `${year}-${month}-${day}`;
             };
 
-            document.getElementById('start1').value = formatDate(oneWeekAgo);
-            document.getElementById('end1').value = formatDate(now);
-            document.getElementById('start2').value = formatDate(twoWeeksAgo);
-            document.getElementById('end2').value = formatDate(oneWeekAgo);
+            // 初始化日期范围选择器
+            const dateRange1 = flatpickr("#dateRange1", {
+                mode: "range",
+                dateFormat: "Y-m-d",
+                defaultDate: [formatDate(twoWeeksAgo), formatDate(oneWeekAgo)],
+                locale: {
+                    rangeSeparator: " 至 ",
+                    weekdays: {
+                        shorthand: ['日', '一', '二', '三', '四', '五', '六'],
+                        longhand: ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
+                    },
+                    months: {
+                        shorthand: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+                        longhand: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月']
+                    }
+                },
+                onChange: function(selectedDates) {
+                    if (selectedDates.length === 2) {
+                        document.getElementById('start1').value = selectedDates[0].toISOString().split('T')[0];
+                        document.getElementById('end1').value = selectedDates[1].toISOString().split('T')[0];
+                    }
+                }
+            });
+
+            const dateRange2 = flatpickr("#dateRange2", {
+                mode: "range",
+                dateFormat: "Y-m-d",
+                defaultDate: [formatDate(oneWeekAgo), formatDate(now)],
+                locale: {
+                    rangeSeparator: " 至 ",
+                    weekdays: {
+                        shorthand: ['日', '一', '二', '三', '四', '五', '六'],
+                        longhand: ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
+                    },
+                    months: {
+                        shorthand: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+                        longhand: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月']
+                    }
+                },
+                onChange: function(selectedDates) {
+                    if (selectedDates.length === 2) {
+                        document.getElementById('start2').value = selectedDates[0].toISOString().split('T')[0];
+                        document.getElementById('end2').value = selectedDates[1].toISOString().split('T')[0];
+                    }
+                }
+            });
+
+            // 设置初始值到隐藏字段
+            document.getElementById('start1').value = formatDate(twoWeeksAgo);
+            document.getElementById('end1').value = formatDate(oneWeekAgo);
+            document.getElementById('start2').value = formatDate(oneWeekAgo);
+            document.getElementById('end2').value = formatDate(now);
         }
 
         // 页面加载时设置默认日期
@@ -350,26 +526,30 @@
 
             // 验证输入
             if (!start1 || !end1 || !start2 || !end2) {
-                showError('请填写所有时间字段');
+                showError('请选择完整的日期范围');
                 return;
             }
+
+            // 禁用按钮防止重复提交
+            const submitButton = document.querySelector('.submit-button');
+            submitButton.disabled = true;
 
             // 显示加载状态
             showLoading(true);
             hideError();
             hideResult();
 
-            // 构建请求URL
+            // 构建请求URL - 添加时间部分（设置为当天开始和结束）
             const params = new URLSearchParams({
-                start_date_1: new Date(start1).toISOString(),
-                end_date_1: new Date(end1).toISOString(),
+                start_date_1: `${start1}T00:00:00`,
+                end_date_1: `${end1}T23:59:59`,
                 event_type_3_first: eventType,
-                start_date_2: new Date(start2).toISOString(),
-                end_date_2: new Date(end2).toISOString(),
+                start_date_2: `${start2}T00:00:00`,
+                end_date_2: `${end2}T23:59:59`,
                 event_type_3_second: eventType
             });
 
-            const url = `http://localhost:8000/tickets/get_tickets_of_two_periods_and_by_type?${params}`;
+            const url = `http://47.111.87.151:8000/tickets/get_tickets_of_two_periods_and_by_type?${params}`;
 
             try {
                 const response = await fetch(url, {
@@ -380,7 +560,8 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                    const errorData = await response.json().catch(() => null);
+                    throw new Error(errorData?.detail || `HTTP error! status: ${response.status}`);
                 }
 
                 const data = await response.json();
@@ -391,6 +572,7 @@
                 showError('请求失败：' + error.message);
             } finally {
                 showLoading(false);
+                submitButton.disabled = false;
             }
         }
 
@@ -427,12 +609,43 @@
             }
 
             resultSection.classList.add('active');
+
+            // 滚动到结果区域
+            resultSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
 
         function hideResult() {
             const resultSection = document.querySelector('.result-section');
             resultSection.classList.remove('active');
         }
+
+        // 复制结果功能
+        async function copyResult() {
+            const resultContent = document.querySelector('.result-content').textContent;
+            const copyButton = document.querySelector('.copy-button');
+
+            try {
+                await navigator.clipboard.writeText(resultContent);
+                copyButton.textContent = '已复制!';
+                copyButton.classList.add('copied');
+
+                setTimeout(() => {
+                    copyButton.textContent = '复制结果';
+                    copyButton.classList.remove('copied');
+                }, 2000);
+            } catch (err) {
+                console.error('复制失败:', err);
+                showError('复制失败，请手动选择文本复制');
+            }
+        }
+
+        // 键盘快捷键支持
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + Enter 提交
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                submitComparison();
+            }
+        });
     </script>
 </body>
 </html>

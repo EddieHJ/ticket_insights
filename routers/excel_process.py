@@ -18,3 +18,7 @@ async def convert_endpoint():
 
     except Exception as e:
         return {"msg": "转换失败", "error": str(e)}
+
+@router.get("/test")
+async def test():
+    return "hello world"
