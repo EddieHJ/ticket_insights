@@ -550,7 +550,7 @@
             });
 
             // const url = `http://47.111.87.151:8000/tickets/get_tickets_of_two_periods_and_by_type?${params}`;
-            const url = `http://127.0.0.1:8000/tickets/get_tickets_of_two_periods_and_by_type?${params}`;
+            const url = `/api/tickets/get_tickets_of_two_periods_and_by_type?${params}`;
 
             try {
                 const response = await fetch(url, {
