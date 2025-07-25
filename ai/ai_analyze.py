@@ -1,6 +1,9 @@
 import json
 import os
 from openai import OpenAI
+from dotenv import load_dotenv
+
+load_dotenv()  # 加载 .env 文件中的变量
 
 client = OpenAI(
     api_key=os.getenv("DASHSCOPE_API_KEY"),
