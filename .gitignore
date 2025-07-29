@@ -13,3 +13,9 @@ __pycache__/
 *.xls
 *.ipynb
 *.env
+*.log
+
+# 忽略个别文件
+*.yaml
+logger.py
+logger_overall.py

@@ -4,9 +4,13 @@ from utils.db_util import db_dependency
 import models
 from sqlalchemy.exc import IntegrityError
 import logging
+from utils.logger_helper import logger
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+# logging.basicConfig(
+#     level=logging.INFO,
+#     format='[%(asctime)s] [%(levelname)s] [%(name)s] - %(message)s'
+# )
+# logger = logging.getLogger(__name__)
 
 def convert_yn_to_bool(value):
     if isinstance(value, str):

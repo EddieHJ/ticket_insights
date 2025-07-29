@@ -7,6 +7,8 @@ from repository.crud import TicketRepository, TicketsRangeAndEventType4Query, Ti
     TicketsRangeAndEventType4Query2
 from utils.db_util import db_dependency
 
+from utils.logger_helper import get_logger
+
 router = APIRouter(
     prefix="/tickets",
     tags=["工单分析"],
@@ -36,7 +38,11 @@ async def get_tickets_of_two_periods_and_by_type(db: db_dependency, date1: date_
     tickets1 = dao.get_tickets_by_date_and_type(first)
     tickets2 = dao.get_tickets_by_date_and_type(second)
 
-    print(tickets1, tickets2)
+    # print(tickets1, tickets2)
+    # logger.warning(f"获取了工单数据: {tickets1} {tickets2}")   # 这里为什么没有时间戳？
+    logger = get_logger(__name__, log_file="app.log")
+    logger.info(f"🔗 获取了工单数据: {tickets1} {tickets2}")
+
 
     ai_response = analyze_ticket_periods(tickets1, tickets2)
 
