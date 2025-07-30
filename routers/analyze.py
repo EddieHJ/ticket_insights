@@ -40,7 +40,7 @@ async def get_tickets_of_two_periods_and_by_type(db: db_dependency, date1: date_
 
     # print(tickets1, tickets2)
     # logger.warning(f"获取了工单数据: {tickets1} {tickets2}")   # 这里为什么没有时间戳？
-    logger = get_logger(__name__, log_file="app.log")
+    logger = get_logger(__name__)
     logger.info(f"🔗 获取了工单数据: {tickets1} {tickets2}")
 
 

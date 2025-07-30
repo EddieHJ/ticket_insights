@@ -4,13 +4,14 @@ import pandas as pd
 from utils.db_util import db_dependency
 from utils.excel_cleaner import clean_excel
 from utils.db_importer import insert_rows_from_df
-from utils.logger_helper import logger
+from utils.logger_helper import get_logger
 
 router = APIRouter(
     prefix="/import_to_db",
     tags=["导入数据库"],
 )
 
+logger = get_logger(__name__)
 
 @router.post("/upload")
 async def upload_excel(db: db_dependency, file: UploadFile = File(...)):
