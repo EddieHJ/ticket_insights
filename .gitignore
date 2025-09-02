@@ -14,6 +14,9 @@ __pycache__/
 *.ipynb
 *.env
 *.log
+*.png
+*.jpg
+*.jpeg
 
 # 忽略个别文件
 *.yaml
@@ -23,3 +26,4 @@ logger_overall.py
 
 # 忽略文件夹
 rag/
+temp_files/
